@@ -6,6 +6,7 @@ users = pd.read_csv('dataframe_LasVegas_users_todb.csv', index_col='user_id')
 reviews = pd.read_csv('dataframe_LasVegas_reviews.csv', index_col='review_id')
 
 conn = sql.connect('RecommendationsDB.db')
+c = conn.cursor()
 
 
 # pd.read_sql("SELECT  name FROM sqlite_master WHERE type ='table' AND name NOT LIKE 'sqlite_%';", conn)
@@ -24,7 +25,11 @@ try:
 except:
   print("Table \"reviews\" already exists")
 
+c.execute('ALTER TABLE restuarants ADD model_id INTEGER')
+c.execute('ALTER TABLE users ADD model_id INTEGER')
+
 restuarants_data = pd.read_sql('SELECT * FROM restuarants', conn)
+
 users_data = pd.read_sql('SELECT * FROM users', conn)
 reviews_data = pd.read_sql('SELECT * FROM reviews', conn)
 
