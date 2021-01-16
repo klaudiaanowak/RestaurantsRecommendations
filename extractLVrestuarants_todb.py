@@ -16,6 +16,7 @@ data_business = []
 for d in data:
     new_data_entry ={}
     new_data_entry['business_id'] = d['business_id']
+    new_data_entry['name'] = d['name']
     new_data_entry['stars'] = d['stars']
     new_data_entry['review_count'] = d['review_count']
     r_type = list(set(d['categories']) & restuarants_type)

@@ -8,7 +8,6 @@ class DataBaseManager():
         self.user = None
         
     def login_user(self, username, password):
-        print(username+" "+ password)
         if(username is ""):
             return False
         query = "SELECT * FROM users WHERE user_id='{}'".format(username)
@@ -19,6 +18,13 @@ class DataBaseManager():
                 self.user = user_data
                 return True
         return False
+    def register_user(self,userName,password, name, email, tel):
+        try:
+            self.c.execute('INSERT INTO  users (login, haslo, name, email, tel) VALUES(?,?,?,?,?)',(userName, password, name, email, tel))
+            self.conn.commit() 
+            return True
+        except:
+            return False
 
     def get_user_modelID(self):
         return self.user['model_id']

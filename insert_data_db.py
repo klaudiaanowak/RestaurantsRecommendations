@@ -28,8 +28,11 @@ except:
 c.execute('ALTER TABLE restuarants ADD model_id INTEGER')
 c.execute('ALTER TABLE users ADD model_id INTEGER')
 
-restuarants_data = pd.read_sql('SELECT * FROM restuarants', conn)
+c.execute("INSERT INTO users (user_id, name) values(?,?)",('admin','Administrator'))
+conn.commit()
 
+
+restuarants_data = pd.read_sql('SELECT * FROM restuarants', conn)
 users_data = pd.read_sql('SELECT * FROM users', conn)
 reviews_data = pd.read_sql('SELECT * FROM reviews', conn)
 
