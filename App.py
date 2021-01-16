@@ -3,9 +3,6 @@ from tkinter import ttk
 from DataBaseManager import *
 from RecommendationModelManager import *
 import sys
-import _thread as thread
-from time import sleep
-import queue
 from utils import *
 
 
