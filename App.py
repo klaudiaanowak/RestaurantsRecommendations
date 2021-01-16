@@ -3,21 +3,21 @@ from tkinter import ttk
 from DataBaseManager import *
 from RecommendationModelManager import *
 import sys
-
-LARGE_FONT= ("Verdana", 12)
-MEDIUM_FONT= ("Verdana", 11)
-SMALL_FONT= ("Verdana", 8)
+import _thread as thread
+from time import sleep
+import queue
+from utils import *
 
 
 class App(tk.Tk):
     def __init__(self, title="Aplikacja"):
         super().__init__() 
         self.title(title)  
+        self.geometry("200x210")
         self.center()
         self.container = tk.Frame(master=self,
                     relief=tk.RAISED,
                     borderwidth=1)
-        self.geometry("1000x1000")
         tk.Label(self,text = 'Restaurants recommendations', bg = 'light blue', width = '300', height ='2', font = ('Calibri', 18)).pack(pady=5,padx=10)
         self.container.pack(side="top", fill="both", expand = True)
         self.container.columnconfigure(0, weight=1, minsize=200)
@@ -43,11 +43,14 @@ class App(tk.Tk):
 
         self.geometry("{}x{}+{}+{}".format(wx, wy, x, y))
 
-    def show_frame(self, cont,error=None,user=None):
+    def show_frame(self, cont,error=None,user=None, information=None):
         if error is not None:
             frame = cont(self.container, self,error=error)
         elif user is not None:
-            frame = cont(self.container, self, user=user)
+            if information is not None:
+                frame = cont(self.container, self, user=user, information=information)
+            else:
+                frame = cont(self.container, self, user=user)
         else:
             frame = cont(self.container, self)
 
@@ -219,15 +222,29 @@ class AddRatingPage(tk.Frame):
 
 
 class AdminPage(tk.Frame):
-    def __init__(self, parent, controller, user):
+    def __init__(self, parent, controller, user, error=None, information=None):
         tk.Frame.__init__(self,parent)
         self.controller = controller
         self.user = user
         tk.Label(self, text ="Administration Page",font=MEDIUM_FONT).pack()
-        back_button = tk.Button(self, text = 'Logout', height = '2', width = '30', command = self.go_back)
+        update_model_button = tk.Button(self, text = 'Update model', height = '2', width = '30', command = self.update_recommendation_model)
+        update_model_button.pack(pady=20)
+        if(error is not None):
+            tk.Label(self, text="Error: "+error, fg="red").pack()
+        if(information is not None):
+            tk.Label(self, text=information, bg='white', fg="green").pack()
+        back_button = tk.Button(self, text = 'Back', height = '2', width = '30', command = self.go_back)
         back_button.pack(side='bottom')
-        
+
     def go_back(self):
        self.controller.show_frame(WelcomePage)       
+    
+    def update_recommendation_model(self):
+        if(self.controller.recommendationManager.update_model()):
+            self.controller.show_frame(AdminPage,user=self.user, information="Model successfully updated")
+        else: 
+            self.controller.show_frame(AdminPage,user=self.user, error="Error during model updating")
+
+
 
 

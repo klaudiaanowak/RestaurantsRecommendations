@@ -39,4 +39,8 @@ class DataBaseManager():
         query ='SELECT name, categories, stars FROM restuarants WHERE business_id IN {}'.format(list(recommendedModelIDs.values)).replace("[","(").replace("]",")")
         recommendationData = pd.read_sql(query, self.conn)
         return recommendationData
+    
+    def get_reviews_data(self):
+        reviews_data = pd.read_sql('SELECT * FROM reviews', self.conn)
+        return reviews_data
 
