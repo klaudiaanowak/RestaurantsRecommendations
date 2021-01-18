@@ -2,6 +2,7 @@ from tkinter import *
 import sys
 import sqlite3
 from tkinter import messagebox as ms
+import random
 
 
 
@@ -111,10 +112,8 @@ def wybor():
     Label(screen9, text = 'Wybierz restauracje, którą chcesz ocenić', font=('Calibri, 11')).pack()
     Label(screen9, text = '').pack()
 
-
-    my_listbox= Listbox(screen9, selectmode = SINGLE)
-
-
+    my_listbox = Listbox(screen9)
+    my_listbox.pack(pady=15)
     
 
     my_listbox.insert(1, 'Steakhouse')
@@ -130,11 +129,21 @@ def wybor():
     my_listbox.insert(11, 'Chinese')
     my_listbox.insert(12, 'Japanese')
     my_listbox.insert(13, 'Fast Food')
-    my_listbox.pack(pady=15)
-    
-    
 
-    Button(screen9, text = 'Wybierz', height = '2', width = '30', command = wybierz).pack()
+    def select():
+        my_label.config(text=my_listbox.get(ANCHOR))
+        global value
+        value=my_listbox.get(ANCHOR)
+        print(value)
+        
+    
+    global my_label
+    my_label = Label(screen9, text="", fg="green")
+    my_label.pack(pady=5)
+
+    my_button2 = Button(screen9, text="Select", command = select and opinia,height = '2', width = '30')
+    my_button2.pack(pady=10)
+
     Button(screen9, text = 'Wyjście', height = '2', width = '30', command = koniec).pack()
     
 
@@ -145,6 +154,7 @@ def opinia():
     screen4.title('Rekomendacje restauracji')
     screen4.geometry('400x400')
 
+
     global ocena
     global ocena_entry
     global restauracja_entry
@@ -152,11 +162,8 @@ def opinia():
     ocena = StringVar()
     restauracja = StringVar()
 
-    Label(screen4, text = 'Dodaj opienie o restauracji', height = '2', width = '30').pack()
+    Label(screen4, text = 'Dodaj ocenę wybranej restauracji', height = '2', width = '30').pack()
     Label(screen4, text = '').pack()
-    Label(screen4, text = 'Nazwa restauracji: ').pack()
-    restauracja_entry = Entry(screen4, textvariable = restauracja)
-    restauracja_entry.pack()
     Label(screen4, text = 'Ocena (1-5): ').pack()
     ocena_entry = Entry(screen4, textvariable = ocena)
     ocena_entry.pack()
@@ -170,8 +177,14 @@ def dodanoopinie():
     
     conn = sqlite3.connect('RecommendationsDB.db')
     c = conn.cursor()
+    
+    review = join(random.sample('abcdefghijklmnoperstuwyzq1234567890!@#$%^&*()_-',25))
+    business = ("SELECT * FROM users WHERE categories = ?")
+    c.execute(business,[(value.get())])
+    c.execute("""INSERT INTO  reviews (review_id, user_id, business_id, stars, date) VALUES(?,?,?,?,?),(review.get(), login.get(), business.get(), ocena.get(), '0')""")
 
-    c.execute("""INSERT INTO  reviews (review_id, user_id, business_id, stars, date) VALUES(?,?,?,?,?),('', login.get(), '', ocena.get(), '0')""")
+    
+
 
     conn.commit() 
     conn.close()
@@ -197,7 +210,6 @@ def dodanoopinie():
 
 
 def logowanie():
-    screen.destroy()
     global screen2
     screen2 = Tk()
     screen2.title('Logowanie')
@@ -259,7 +271,9 @@ def weryfikacja():
         
         Label(screen11, text = 'Nie udało się zalogować!', fg='red', font=('Calibri, 11')).pack()
         Label(screen11, text = '').pack()
-        Button(screen11, text = 'Wróć do strony początkowej', height = '2', width = '30', command = main_screen).pack()
+        Button(screen11, text = 'Spróbuj zalogować się ponownie', height = '2', width = '30', command = logowanie).pack()
+        Label(screen11, text = '').pack()
+        Button(screen11, text = 'Zarejestruj się', height = '2', width = '30', command = rejestracja).pack()
         Label(screen11, text = '').pack()
         Button(screen11, text = 'Wyjście', height = '2', width = '30', command = koniec).pack()
 
