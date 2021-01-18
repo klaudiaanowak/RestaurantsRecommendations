@@ -3,6 +3,7 @@ import sys
 import sqlite3
 from tkinter import messagebox as ms
 import random
+import uuid
 
 
 
@@ -178,7 +179,7 @@ def dodanoopinie():
     conn = sqlite3.connect('RecommendationsDB.db')
     c = conn.cursor()
     
-    review = join(random.sample('abcdefghijklmnoperstuwyzq1234567890!@#$%^&*()_-',25))
+    review = uuid.uuid4()
     business = ("SELECT * FROM users WHERE categories = ?")
     c.execute(business,[(value.get())])
     c.execute("""INSERT INTO  reviews (review_id, user_id, business_id, stars, date) VALUES(?,?,?,?,?),(review.get(), login.get(), business.get(), ocena.get(), '0')""")
