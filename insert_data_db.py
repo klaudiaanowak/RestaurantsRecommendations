@@ -9,7 +9,6 @@ conn = sql.connect('RecommendationsDB.db')
 c = conn.cursor()
 
 
-# pd.read_sql("SELECT  name FROM sqlite_master WHERE type ='table' AND name NOT LIKE 'sqlite_%';", conn)
 try:
     business.to_sql('restuarants', conn, index=True, index_label='business_id')
 except:
@@ -27,15 +26,24 @@ except:
 
 c.execute('ALTER TABLE restuarants ADD model_id INTEGER')
 c.execute('ALTER TABLE users ADD model_id INTEGER')
+c.execute("ALTER TABLE  users ADD COLUMN haslo")
+c.execute("ALTER TABLE  users ADD COLUMN email")
+c.execute("ALTER TABLE  users ADD COLUMN telefon")
 
-c.execute("INSERT INTO users (user_id, name) values(?,?)",('admin','Administrator'))
+for user in users.index:
+    query = "UPDATE users SET haslo = '{}' WHERE user_id='{}'".format("pass"+user, user)
+    c.execute(query)
+
+
+
+c.execute("INSERT INTO users (user_id, name, haslo) values(?,?,?)",('admin','Administrator','admin'))
 conn.commit()
 
 
-restuarants_data = pd.read_sql('SELECT * FROM restuarants', conn)
+restaurants_data = pd.read_sql('SELECT * FROM restuarants', conn)
 users_data = pd.read_sql('SELECT * FROM users', conn)
 reviews_data = pd.read_sql('SELECT * FROM reviews', conn)
 
-print(restuarants_data)
+print(restaurants_data)
 print(users_data)
 print(reviews_data)

@@ -51,20 +51,10 @@ class RecommendationModelManager():
             
             self.model = model
             self.save_model(self.modelName)
+            dbManager.update_recommendation_model_data(reviews_data, n_restaurant)
             return True
         except:
           return False
-
-        #insert multiple records in a single query
-        for i in range(n_restaurant):
-            query = "UPDATE restuarants SET model_id = {} WHERE business_id='{}'".format(reviews_data['restaurant'][i], reviews_data['business_id'][i])
-            c.execute(query)
-        for i in range(n_restaurant):
-            query = "UPDATE users SET model_id = {} WHERE user_id='{}'".format(reviews_data['user'][i], reviews_data['user_id'][i])
-            c.execute(query)
-
-        self.conn.commit()
-
 
     def get_model(self):
         return self.model

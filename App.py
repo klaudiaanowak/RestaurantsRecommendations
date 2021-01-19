@@ -40,8 +40,15 @@ class App(tk.Tk):
 
         self.geometry("{}x{}+{}+{}".format(wx, wy, x, y))
 
-    def show_frame(self, cont,error=None,user=None, information=None):
-        if error is not None:
+    def show_frame(self, cont,error=None,user=None, restaurant=None, information=None):
+
+        if error is not None and user is not None and restaurant is not None:
+            frame = cont(self.container, self,user = user, restaurant=restaurant, error=error)
+        elif user is not None and restaurant is not None:
+            frame = cont(self.container, self,user = user, restaurant=restaurant)
+        elif error is not None and user is not None:
+            frame = cont(self.container, self,user = user, error=error)
+        elif error is not None:
             frame = cont(self.container, self,error=error)
         elif user is not None:
             if information is not None:
@@ -81,7 +88,7 @@ class LoginPage(tk.Frame):
         login_entry.pack()
         tk.Label(self, text = '').pack()
         tk.Label(self, text = 'Password: ').pack()
-        password_entry = tk.Entry(self, width = '30')
+        password_entry = tk.Entry(self,show="*", width = '30')
         password_entry.pack()
         tk.Label(self, text = '').pack()
         if(error is not None):
@@ -114,9 +121,6 @@ class RegisterPage(tk.Frame):
         self.controller = controller
         tk.Label(self, text = 'Fill up data').pack()
         tk.Label(self, text = '').pack()
-        tk.Label(self, text = 'E-mail: ').pack()
-        email_entry = tk.Entry(self)
-        email_entry.pack()
         tk.Label(self, text = 'Name: ').pack()
         name_entry = tk.Entry(self)
         name_entry.pack()
@@ -124,8 +128,11 @@ class RegisterPage(tk.Frame):
         login_entry = tk.Entry(self)
         login_entry.pack()
         tk.Label(self, text = 'Password: ').pack()
-        password_entry = tk.Entry(self)
+        password_entry = tk.Entry(self,show="*")
         password_entry.pack()
+        tk.Label(self, text = 'E-mail: ').pack()
+        email_entry = tk.Entry(self)
+        email_entry.pack()
         tk.Label(self, text = 'Telephon number: ').pack()
         tel_entry = tk.Entry(self)
         tel_entry.pack()
@@ -166,7 +173,7 @@ class MainPage(tk.Frame):
         tk.Label(self, text = '').pack()
         tk.Button(self, text = 'Check restaurants recommendations', height = '2', width = '30', command= lambda: self.controller.show_frame(RecommendationListPage,user=userName)).pack()
         tk.Label(self, text = '').pack()
-        tk.Button(self, text = 'Add rating', height = '2', width = '30', command = lambda: self.controller.show_frame(AddRatingPage,user=userName)).pack()
+        tk.Button(self, text = 'Add rating', height = '2', width = '30', command = lambda: self.controller.show_frame(AddRatingSearchRestaurantPage,user=userName)).pack()
         tk.Label(self, text = '').pack()
         tk.Button(self, text = 'Logout', height = '2', width = '30', command = self.go_back).pack()
 
@@ -179,11 +186,14 @@ class RecommendationListPage(tk.Frame):
         self.controller = controller
         self.user = user
         self.restuarantsData = controller.dbManager.get_restuarant_data()   
-        self.fill_recommendations_tab( user)
+        self.fill_recommendations_tab(user)
         tk.Button(self, text = 'Back', height = '2', width = '30', command = self.go_back).pack(side='bottom')
 
     def get_recommendation_list_content(self):
         userModelID = self.controller.dbManager.get_user_modelID()
+        print(userModelID)
+        if (userModelID is None): 
+            return self.controller.dbManager.get_default_recommended_restaurants()
         recommendedData = self.controller.recommendationManager.get_recommendations(userModelID,self.restuarantsData)
         return self.controller.dbManager.get_recommended_restaurants(recommendedData)
 
@@ -207,17 +217,93 @@ class RecommendationListPage(tk.Frame):
 
 
 
-class AddRatingPage(tk.Frame):
+class AddRatingSearchRestaurantPage(tk.Frame):
     def __init__(self, parent, controller, user):
         tk.Frame.__init__(self,parent)
         self.controller = controller
         self.user = user
+        self.listbox_frame = tk.Frame(self)
+        tk.Label(self, text ="Rate restaurant",font=MEDIUM_FONT).pack()
+        tk.Label(self, text = 'Search restaurant by name').pack()
+        search_text_entry = tk.Entry(self,width = '30')
+        search_text_entry.pack()
+        button = tk.Button(self, text="Search", command=lambda: self.get_restaurants(search_text_entry.get()))
+        button.pack(pady=1)
+
         back_button = tk.Button(self, text = 'Back', height = '2', width = '30', command = self.go_back)
         back_button.pack(side='bottom')
+    
+    def get_restaurants(self,search_text):
+        self.listbox_frame.destroy()
+        self.listbox_frame = tk.Frame(self)
+        self.listbox_frame.pack()
+        results = self.controller.dbManager.get_restuarant_data_with_text(search_text)
+        length = len(results) if len(results) <= 10 else 10
+        ttk.Label(self.listbox_frame, text = 'Choose restaurant').pack()
+        self.my_listbox = tk.Listbox(self.listbox_frame,height=length, width=40)
+        self.my_listbox.pack(pady=1)
+        self.my_listbox.delete(0, tk.END)
+        for i in range(1,length+1):
+            restaurant = results.iloc[i-1]
+            self.my_listbox.insert(i, restaurant['name'])
+        my_button2 = tk.Button(self.listbox_frame, text="Select", command=lambda: get_selected(results))
+        my_button2.pack()
+
+        def get_selected(results):
+            try:
+                index = self.my_listbox.curselection()
+                self.add_rating(results.iloc[index]['business_id'])
+            except:
+                pass
+
+    def add_rating(self, restaurant):
+        self.controller.show_frame(AddRatingPage,user=self.user, restaurant=restaurant)   
+
     def go_back(self):
        self.controller.show_frame(MainPage,user=self.user)       
 
+class AddRatingPage(tk.Frame):
+    def __init__(self, parent, controller, user, restaurant, error=None):
+        tk.Frame.__init__(self,parent)
+        self.controller = controller
+        self.user = user
+        self.restaurant = restaurant
 
+        tk.Label(self, text = 'Add rating', height = '2', width = '30').pack()
+        tk.Label(self, text = '').pack()
+        tk.Label(self, text = 'Rating (1-5): ').pack()
+        ocena_entry = tk.Entry(self)
+        ocena_entry.pack()
+        if(error is not None):
+            tk.Label(self, text="Error: "+error, fg="red").pack(pady=5,padx=5)
+        
+        tk.Label(self, text = '').pack()
+        tk.Button(self, text = 'Add', height = '2', width = '30', command = lambda: self.add_rating(ocena_entry.get())).pack()
+        tk.Button(self, text = 'Back', height = '2', width = '30', command = self.go_back).pack()
+
+    def add_rating(self,rating):
+        rating = int(rating)
+        if(self.controller.dbManager.add_rating(self.restaurant,rating)):
+            self.controller.show_frame(SuccessfulAddRatingPage, user=self.user)   
+        else:
+            self.controller.show_frame(AddRatingPage,user=self.user, restaurant=self.restaurant, error="Incorrect data. Try again.")   
+
+
+    def go_back(self):
+       self.controller.show_frame(AddRatingSearchRestaurantPage, user= self.user)       
+    
+class SuccessfulAddRatingPage(tk.Frame):
+    def __init__(self, parent, controller, user):        
+        tk.Frame.__init__(self,parent)
+        self.controller = controller  
+        self.user = user
+        tk.Label(self, text = 'Your rating is saved successfully!', fg='green', font=('Calibri, 11')).pack()
+        tk.Label(self, text = '').pack()
+        tk.Button(self, text = 'Back', width = 10, height = 1, command = self.go_back).pack(side='bottom')
+
+    def go_back(self):
+        self.controller.show_frame(MainPage, user= self.user)  
+      
 class AdminPage(tk.Frame):
     def __init__(self, parent, controller, user, error=None, information=None):
         tk.Frame.__init__(self,parent)
