@@ -143,8 +143,8 @@ class RegisterPage(tk.Frame):
         tk.Button(self, text = 'Register', width = 10, height = 1, command=lambda: self.controller.show_frame(SuccessfulRegistrationPage) 
                                                                                 if self.register_user(login_entry.get(), password_entry.get(), name_entry.get(), email_entry.get(), tel_entry.get()) 
                                                                                 else self.controller.show_frame(RegisterPage,error="Incorrect data. Try again")).pack()
-        tk.Button(self, text = 'Back', height = 1, width = 10, command = self.go_back).pack(side='bottom')
-
+        back_button = tk.Button(self, text = 'Back', height = '2', width = '30', command = self.go_back)
+        back_button.pack(side='bottom')
 
  
     def register_user(self,userName,password, name, email, tel):
@@ -191,7 +191,6 @@ class RecommendationListPage(tk.Frame):
 
     def get_recommendation_list_content(self):
         userModelID = self.controller.dbManager.get_user_modelID()
-        print(userModelID)
         if (userModelID is None): 
             return self.controller.dbManager.get_default_recommended_restaurants()
         recommendedData = self.controller.recommendationManager.get_recommendations(userModelID,self.restuarantsData)
@@ -299,7 +298,8 @@ class SuccessfulAddRatingPage(tk.Frame):
         self.user = user
         tk.Label(self, text = 'Your rating is saved successfully!', fg='green', font=('Calibri, 11')).pack()
         tk.Label(self, text = '').pack()
-        tk.Button(self, text = 'Back', width = 10, height = 1, command = self.go_back).pack(side='bottom')
+        back_button = tk.Button(self, text = 'Back', height = '2', width = '30', command = self.go_back)
+        back_button.pack(side='bottom')
 
     def go_back(self):
         self.controller.show_frame(MainPage, user= self.user)  

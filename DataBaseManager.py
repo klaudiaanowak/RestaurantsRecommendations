@@ -1,6 +1,5 @@
 import sqlite3 as sql
 import pandas as pd
-import random
 import uuid
 from datetime import datetime
 
@@ -77,13 +76,7 @@ class DataBaseManager():
         user_id = self.user['user_id'].values[0]
         now = datetime.now()
         dt_string = now.strftime("%Y-%m-%d %H:%M:%S")
-        print(business_id)
-        print(user_id)
-        print(review_id)
-        print(grade)
-        print(dt_string)
         query = "INSERT INTO  reviews (review_id, user_id, business_id, stars, date) VALUES('{}','{}','{}',{},'{}')".format(review_id,user_id,business_id,grade,dt_string)
-        print(query)
         self.c.execute(query)
         self.conn.commit() 
         return True
