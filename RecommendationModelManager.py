@@ -38,7 +38,6 @@ class RecommendationModelManager():
             X = reviews_data[['user', 'restaurant']].values
             y = reviews_data['stars'].values
             X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1, random_state=42)
-            X_train.shape, X_test.shape, y_train.shape, y_test.shape
 
             n_factors = 50
             X_train_array = [X_train[:, 0], X_train[:, 1]]
